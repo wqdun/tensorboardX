@@ -2,19 +2,27 @@
 
 # Exit on error
 # set -e
-
-DESIRED_PROTO_VERSION="3.6.1"
+echo $PROTOC_VER
+if [ -z ${PROTOC_VER+x} ]
+then
+  DESIRED_PROTO_VERSION="3.6.1"
+  echo "PROTOC_VER not set, use default"
+else
+  DESIRED_PROTO_VERSION=$PROTOC_VER
+fi
 
 # call protoc direclty, if version is not the desired one, download the desired vesrion.
 
 
 if [ -f "protoc/bin/protoc" ]; then
   PROTOC_BIN="protoc/bin/protoc"
+elif [ -f "protoc/protoc" ]; then
+  PROTOC_BIN="protoc/protoc"
 else
   PROTOC_BIN=`which protoc`
 fi
 
-echo "using" $PROTOC_BIN
+
 
 CURRENT_PROTOC_VER=`${PROTOC_BIN} --version`
 if [ -z ${PROTOC_BIN} ] || [[ "$CURRENT_PROTOC_VER" != "libprotoc "$DESIRED_PROTO_VERSION ]]; then
@@ -29,10 +37,19 @@ if [ -z ${PROTOC_BIN} ] || [[ "$CURRENT_PROTOC_VER" != "libprotoc "$DESIRED_PROT
     ${WGET_BIN} https://github.com/protocolbuffers/protobuf/releases/download/v"$DESIRED_PROTO_VERSION"/${PROTOC_ZIP}
     rm -rf protoc
     python -c "import zipfile; zipfile.ZipFile('"${PROTOC_ZIP}"','r').extractall('protoc')"
-    PROTOC_BIN=protoc/bin/protoc
+    # PROTOC_BIN=protoc/bin/protoc
+    if [ -f "protoc/bin/protoc" ]; then
+      PROTOC_BIN="protoc/bin/protoc"
+    elif [ -f "protoc/protoc" ]; then
+      PROTOC_BIN="protoc/protoc"
+    fi
+
     chmod +x ${PROTOC_BIN}
   fi
 fi
+
+echo "using:"
+echo $PROTOC_BIN
 
 # Regenerate
 if [[ ! -z ${PROTOC_BIN} ]]; then

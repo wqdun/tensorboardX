@@ -185,7 +185,7 @@ class GraphPy(object):
 
         if self.profile_result is not None:
             profile_result = self.profile_result.function_events
-
+        print(profile_result)
         _time_used_for_op = {}
 
         # We assume that the model is executed sequentially. So get the timing from
@@ -196,10 +196,11 @@ class GraphPy(object):
                     profile_result.pop(i)
                     time_we_want_cpu = n.cpu_time_total
                     time_we_want_cuda = n.cuda_time_total
+                    print('{:20}'.format(node_name), time_we_want_cpu, "\t",  '{:10}'.format(n.cpu_interval.start), '{:10}'.format(n.cpu_interval.end))
 
                     return int(time_we_want_cpu), int(time_we_want_cuda)
             return None, None
-
+        print('Name          n.cpu_time_total     cpu_interval.start/end')
         should_show_warning = False
         for v in self.nodes_io.values():
             nodes.append(node_proto(v.debugName,
@@ -226,6 +227,7 @@ class GraphPy(object):
                                         all_end_rel_micros=total_time))
 
             if v.tensor_size and len(v.tensor_size) > 0:  # assume data is float32, only parameter is counted
+                this_never_run()
                 node_stats.append(
                     NodeExecStats(node_name=v.debugName,
                                   all_start_micros=int(time.time() * 1e7),
